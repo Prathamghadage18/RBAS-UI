@@ -10,13 +10,13 @@ import {
   Modal,
   TextField,
   Box,
-  Chip,
+  Typography,
 } from "@mui/material";
 
 const RolesPage = () => {
   const [roles, setRoles] = useState([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", permissions: [] });
+  const [form, setForm] = useState({ id: null, name: "", permissions: "" });
 
   useEffect(() => {
     fetchRoles();
@@ -28,38 +28,40 @@ const RolesPage = () => {
   };
 
   const handleSubmit = async () => {
+    const permissions = form.permissions.split(",").map((perm) => perm.trim());
     if (form.id) {
-      await updateRole(form.id, form);
+      await updateRole(form.id, { ...form, permissions });
     } else {
-      await createRole(form);
+      await createRole({ ...form, permissions });
     }
     fetchRoles();
     setOpen(false);
+    setForm({ id: null, name: "", permissions: "" });
   };
 
-  const handleDelete = async (id) => {
-    await deleteRole(id);
-    fetchRoles();
-  };
+ const handleDelete = async (id) => {
+   try {
+     console.log(`Attempting to delete role with ID: ${id}`); // Log the ID
+     await deleteRole(id); // Ensure ID is correctly passed
+     fetchRoles(); // Refresh roles after deletion
+   } catch (error) {
+     console.error(`Failed to delete role with ID ${id}:`, error);
+   }
+ };
 
-  const handlePermissionChange = (permission) => {
-    setForm((prev) => ({
-      ...prev,
-      permissions: prev.permissions.includes(permission)
-        ? prev.permissions.filter((perm) => perm !== permission)
-        : [...prev.permissions, permission],
-    }));
-  };
 
   return (
     <div>
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Typography variant="h4" gutterBottom>
+        Manage Roles
+      </Typography>
+      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
         Add Role
       </Button>
-      <Table>
+      <Table style={{ marginTop: "1rem" }}>
         <TableHead>
           <TableRow>
-            <TableCell>Role Name</TableCell>
+            <TableCell>Name</TableCell>
             <TableCell>Permissions</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -68,37 +70,41 @@ const RolesPage = () => {
           {roles.map((role) => (
             <TableRow key={role.id}>
               <TableCell>{role.name}</TableCell>
-              <TableCell>
-                {role.permissions.map((perm) => (
-                  <Chip key={perm} label={perm} style={{ margin: 2 }} />
-                ))}
-              </TableCell>
+              <TableCell>{role.permissions.join(", ")}</TableCell>
               <TableCell>
                 <Button
+                  color="primary"
                   onClick={() => {
-                    setForm(role);
+                    setForm({
+                      ...role,
+                      permissions: role.permissions.join(", "),
+                    });
                     setOpen(true);
                   }}
                 >
                   Edit
                 </Button>
-                <Button onClick={() => handleDelete(role.id)}>Delete</Button>
+                <Button color="secondary" onClick={() => handleDelete(role.id)}>
+                  Delete
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box
-          sx={{
-            padding: 4,
+          style={{
             backgroundColor: "white",
-            margin: "auto",
-            top: "20%",
+            margin: "5% auto",
+            padding: "1rem",
             width: "50%",
+            borderRadius: "8px",
           }}
         >
+          <Typography variant="h6">
+            {form.id ? "Edit Role" : "Add Role"}
+          </Typography>
           <TextField
             label="Role Name"
             value={form.name}
@@ -106,24 +112,21 @@ const RolesPage = () => {
             fullWidth
             margin="normal"
           />
-          <div>
-            <label>Permissions:</label>
-            {["Read", "Write", "Delete"].map((perm) => (
-              <Chip
-                key={perm}
-                label={perm}
-                onClick={() => handlePermissionChange(perm)}
-                style={{
-                  margin: 2,
-                  backgroundColor: form.permissions.includes(perm)
-                    ? "#1976d2"
-                    : undefined,
-                  color: form.permissions.includes(perm) ? "white" : undefined,
-                }}
-              />
-            ))}
-          </div>
-          <Button onClick={handleSubmit}>Submit</Button>
+          <TextField
+            label="Permissions (comma-separated)"
+            value={form.permissions}
+            onChange={(e) => setForm({ ...form, permissions: e.target.value })}
+            fullWidth
+            margin="normal"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            style={{ marginTop: "1rem" }}
+          >
+            Submit
+          </Button>
         </Box>
       </Modal>
     </div>

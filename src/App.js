@@ -6,22 +6,20 @@ import UsersPage from "./pages/UsersPage";
 import RolesPage from "./pages/RolesPage";
 import PermissionsPage from "./pages/PermissionsPage";
 
-const App = () => {
-  return (
-    <Router>
-      <Header />
-      <div style={{ display: "flex" }}>
-        <Sidebar />
-        <main style={{ padding: "20px", width: "100%" }}>
-          <Routes>
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/roles" element={<RolesPage />} />
-            <Route path="/permissions" element={<PermissionsPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  );
-};
+const App = () => (
+  <Router>
+    <Header />
+    <div style={{ display: "flex" }}>
+      <Sidebar />
+      <main style={{ flex: 1, padding: "1rem" }}>
+        <Routes>
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/roles" element={<RolesPage />} />
+          <Route path="/permissions" element={<PermissionsPage />} />
+        </Routes>
+      </main>
+    </div>
+  </Router>
+);
 
 export default App;

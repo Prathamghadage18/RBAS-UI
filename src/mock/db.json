@@ -10,34 +10,17 @@
   ],
   "roles": [
     {
-      "id": "1",
-      "name": "Admin",
+      "id": null,
+      "name": "g",
       "permissions": [
-        "Read",
-        "Write",
-        "Delete"
-      ]
-    },
-    {
-      "id": "2",
-      "name": "User",
-      "permissions": [
-        "Read"
+        "gg"
       ]
     }
   ],
   "permissions": [
     {
-      "id": "1",
-      "name": "Read"
-    },
-    {
-      "id": "2",
-      "name": "Write"
-    },
-    {
-      "id": "3",
-      "name": "Delete"
+      "id": "69fc",
+      "name": "ef"
     }
   ]
 }

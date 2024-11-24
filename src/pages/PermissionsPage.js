@@ -1,62 +1,116 @@
-import React, { useEffect, useState } from "react";
-import { getRoles, updateRole } from "../services/api";
+import React, { useState, useEffect } from "react";
+import {
+  getPermissions,
+  addPermission,
+  deletePermission,
+} from "../services/api";
 import {
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  Switch,
+  Button,
+  Modal,
+  TextField,
+  Box,
+  Typography,
 } from "@mui/material";
 
 const PermissionsPage = () => {
-  const [roles, setRoles] = useState([]);
+  const [permissions, setPermissions] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "" });
 
   useEffect(() => {
-    fetchRoles();
+    fetchPermissions();
   }, []);
 
-  const fetchRoles = async () => {
-    const data = await getRoles();
-    setRoles(data);
+  const fetchPermissions = async () => {
+    const data = await getPermissions(); // Ensure `getPermissions` returns an array with `id` fields
+    setPermissions(data);
   };
 
-  const togglePermission = async (roleId, permission) => {
-    const role = roles.find((r) => r.id === roleId);
-    const updatedPermissions = role.permissions.includes(permission)
-      ? role.permissions.filter((perm) => perm !== permission)
-      : [...role.permissions, permission];
 
-    await updateRole(roleId, { ...role, permissions: updatedPermissions });
-    fetchRoles();
+  const handleSubmit = async () => {
+    if (form.name) {
+      await addPermission(form.name);
+      fetchPermissions();
+      setOpen(false);
+      setForm({ name: "" });
+    }
   };
+
+  const handleDelete = async (id) => {
+    try {
+      await deletePermission(id);
+      fetchPermissions(); // Refresh permissions list
+    } catch (error) {
+      console.error("Error while deleting permission:", error);
+    }
+  };
+
 
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Role Name</TableCell>
-          <TableCell>Read</TableCell>
-          <TableCell>Write</TableCell>
-          <TableCell>Delete</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {roles.map((role) => (
-          <TableRow key={role.id}>
-            <TableCell>{role.name}</TableCell>
-            {["Read", "Write", "Delete"].map((perm) => (
-              <TableCell key={perm}>
-                <Switch
-                  checked={role.permissions.includes(perm)}
-                  onChange={() => togglePermission(role.id, perm)}
-                />
-              </TableCell>
-            ))}
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Manage Permissions
+      </Typography>
+      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
+        Add Permission
+      </Button>
+      <Table style={{ marginTop: "1rem" }}>
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Actions</TableCell>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {permissions.map((permission) => (
+            <TableRow key={permission.id}>
+              <TableCell>{permission.name}</TableCell>
+              <TableCell>
+                <Button
+                  color="secondary"
+                  onClick={() => handleDelete(permission.id)}
+                >
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <Box
+          style={{
+            backgroundColor: "white",
+            margin: "5% auto",
+            padding: "1rem",
+            width: "50%",
+            borderRadius: "8px",
+          }}
+        >
+          <Typography variant="h6">Add Permission</Typography>
+          <TextField
+            label="Permission Name"
+            value={form.name}
+            onChange={(e) => setForm({ name: e.target.value })}
+            fullWidth
+            margin="normal"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            style={{ marginTop: "1rem" }}
+          >
+            Submit
+          </Button>
+        </Box>
+      </Modal>
+    </div>
   );
 };
 

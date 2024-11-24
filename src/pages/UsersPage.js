@@ -10,12 +10,14 @@ import {
   Modal,
   TextField,
   Box,
+  Typography,
 } from "@mui/material";
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
+    id: null,
     name: "",
     email: "",
     role: "",
@@ -39,6 +41,7 @@ const UsersPage = () => {
     }
     fetchUsers();
     setOpen(false);
+    setForm({ id: null, name: "", email: "", role: "", status: "" });
   };
 
   const handleDelete = async (id) => {
@@ -48,10 +51,13 @@ const UsersPage = () => {
 
   return (
     <div>
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Typography variant="h4" gutterBottom>
+        Manage Users
+      </Typography>
+      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
         Add User
       </Button>
-      <Table>
+      <Table style={{ marginTop: "1rem" }}>
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
@@ -70,6 +76,7 @@ const UsersPage = () => {
               <TableCell>{user.status}</TableCell>
               <TableCell>
                 <Button
+                  color="primary"
                   onClick={() => {
                     setForm(user);
                     setOpen(true);
@@ -77,23 +84,27 @@ const UsersPage = () => {
                 >
                   Edit
                 </Button>
-                <Button onClick={() => handleDelete(user.id)}>Delete</Button>
+                <Button color="secondary" onClick={() => handleDelete(user.id)}>
+                  Delete
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box
-          sx={{
-            padding: 4,
+          style={{
             backgroundColor: "white",
-            margin: "auto",
-            top: "20%",
+            margin: "5% auto",
+            padding: "1rem",
             width: "50%",
+            borderRadius: "8px",
           }}
         >
+          <Typography variant="h6">
+            {form.id ? "Edit User" : "Add User"}
+          </Typography>
           <TextField
             label="Name"
             value={form.name}
@@ -122,7 +133,14 @@ const UsersPage = () => {
             fullWidth
             margin="normal"
           />
-          <Button onClick={handleSubmit}>Submit</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            style={{ marginTop: "1rem" }}
+          >
+            Submit
+          </Button>
         </Box>
       </Modal>
     </div>
